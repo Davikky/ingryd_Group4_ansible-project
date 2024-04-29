@@ -1,8 +1,8 @@
 # Here is the inventory for all remote hosts
-node2
 
 [web_servers]
 node1
 
-
+[db_servers]
+node2
 
