@@ -1,0 +1,24 @@
+# To check for syntax error, run:
+# $ ansible-playbook --key-file ~/.ssh/ansible -i inventory bootstrap.yml --syntax-check
+
+
+---
+
+- hosts: all
+  become: true
+  tasks:
+    - name: Update all nodes (Ubuntu)
+      apt:
+        update_only: yes
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Update all nodes (OracleLinux)
+      dnf:
+        update_only: yes
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "OracleLinux"
+
+...
