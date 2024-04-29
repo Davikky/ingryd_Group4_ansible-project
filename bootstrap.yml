@@ -12,7 +12,6 @@
   tasks:
     - name: Update all nodes (Ubuntu)
       apt:
-        update_only: yes
         update_cache: yes
       changed_when: false
       when: ansible_distribution == "Ubuntu"
@@ -24,6 +23,15 @@
       changed_when: false
       when: ansible_distribution == "OracleLinux"
 
+    - name: Ensure required groups exist
+      group:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - admin1
+        - adm
+        - sudo
+
     - name: Creating User admin
       user:
         name: admin
@@ -32,6 +40,7 @@
          - sudo
          - adm
          - root
+        state: present
 
     - name: Add a sudoer file to admin
       copy:
@@ -40,3 +49,9 @@
         owner: root
         group: root
         mode: 0440
+
+    - name: Add ansible ssh-key to all nodes for user admin
+      authorized_key:
+        user: admin
+        key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICg1N3h0m0XujlaIn58Yv5d5EgA5u4wo2iwdtfTebMWg ansible
+
