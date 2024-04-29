@@ -1,5 +1,8 @@
-# To check for syntax error, run:
-# $ ansible-playbook --key-file ~/.ssh/ansible -i inventory bootstrap.yml --syntax-check
+# To check for syntax error, run:i
+# (a) Without an inventory of hosts:
+# $ ansible-playbook --key-file ~/.ssh/id_ed25519 -i 192.168.100.20,192.168.100.30 bootstrap.yml --syntax-check
+# (b) With hostnames/ip in an inventory file
+# $ ansible-playbook --key-file ~/.ssh/id_ed25519 -i inventory bootstrap.yml --syntax-check
 
 
 ---
