@@ -1,3 +1,4 @@
+![Group4-ansible](https://github.com/Davikky/ingryd_Group4_ansible-project/assets/105892641/6d463092-8676-4e72-a781-b3cac64a8ae2)
 # Ingryrd Linux/DevOps class -Jan 2024 Cohort
 
 ## Ansible configuration repository
