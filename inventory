@@ -1,4 +1,8 @@
 # Here is the inventory for all remote hosts
+node2
 
-192.168.100.20
-192.168.100.30
+[web_servers]
+node1
+
+
+
