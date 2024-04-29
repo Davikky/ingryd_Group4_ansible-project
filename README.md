@@ -22,8 +22,16 @@
 	b. Each member of the group clones the same repo to his/her local machine  
 
 
-Group Members (contributors):
-
-###List to be added by Kafayat Adeyemi###
-
+Group Members (contributors)
+1. Adeyemi Victor
+2. Freedom Unugbai
+3. Adeyemi Kafayat
+4. Toheeb Ibrahim
+5. Moshood Owolabi
+6. John Pamisi
+7. Abdulmuminu Agenyi
+8. Ogochukwu Innocent
+9. Ibrahim Olayinka
+10. Abdulsamad Ahmed
+    
 (c)April, 2024
