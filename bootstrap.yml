@@ -1,47 +1,36 @@
-# to run this playbook
-#   $ ansible-playbook --ask-become bootstrap_config.yml
-  # to list tags
-#   $ ansible-playbook --list-tags bootstrap_config.yml
-  # to run playbook with a specific tag
-#   $ ansible-playbook --tags [tag-name] --ask-become bootstrap_config.yml
-  # to run this playbook as remote_user oga
-#   $ ansible-playbook bootstrap_config.yml
+# To check for syntax error, run:i
+# (a) Without an inventory of hosts:
+# $ ansible-playbook --key-file ~/.ssh/id_ed25519 -i 192.168.100.20,192.168.100.30 bootstrap.yml --syntax-check
+# (b) With hostnames/ip in an inventory file
+# $ ansible-playbook --key-file ~/.ssh/id_ed25519 -i inventory bootstrap.yml --syntax-check
+
+
 ---
 
 - hosts: all
   become: true
   tasks:
+    - name: Update all nodes (Ubuntu)
+      apt:
+        update_only: yes
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "Ubuntu"
 
-    - name: Creating User oga
-      tags: always
+    - name: Update all nodes (OracleLinux)
+      dnf:
+        update_only: yes
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "OracleLinux"
+     
+      name: Creating User admin
       user:
-        name: oga
-        groups: root
+        name: admin
+        group: admin1
+        groups: 
+         - sudo
+         - adm
+         - root
 
-    - name: Add ssh key for user oga
-      tags: always
-      authorized_key:
-        user: oga
-        key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICg1N3h0m0XujlaIn58Yv5d5EgA5u4wo2iwdtfTebMWg ansible 
-
-    - name: Add a sudoers file for user oga
-      tags: always
-      copy:
-        src: sudoer_oga
-        dest: /etc/sudoers.d/oga
-        owner: root
-        group: root
-        mode: 0440
-
-    - name: "Add admin1 as a sudoer"
-      copy:
-        src: sudoer_admin1
-        dest: /etc/sudoers.d/admin1
-        owner: root
-        group: root
-        mode: 0440
-
-    - name: "Add ssh key for admin1 to other nodes"
-      authorized_key:
-        user: admin1
-        
+...
