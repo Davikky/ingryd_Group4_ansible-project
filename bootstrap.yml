@@ -23,21 +23,18 @@
         update_cache: yes
       changed_when: false
       when: ansible_distribution == "OracleLinux"
-     
-      name: Creating User admin
+
+    - name: Creating User admin
       user:
         name: admin
         group: admin1
-        groups: 
+        groups:
          - sudo
          - adm
          - root
 
-...
-
-
-      name: "Add a sudoer file to admin"
-      copy: 
+    - name: Add a sudoer file to admin
+      copy:
         src: sudoer_admin
         dest: /etc/sudoers.d/admin
         owner: root
