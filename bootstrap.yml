@@ -34,3 +34,12 @@
          - root
 
 ...
+
+
+      name: "Add a sudoer file to admin"
+      copy: 
+        src: sudoer_admin
+        dest: /etc/sudoers.d/admin
+        owner: root
+        group: root
+        mode: 0440
