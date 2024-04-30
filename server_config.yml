@@ -1,0 +1,10 @@
+# ansible playbook: server_config.yml
+# Usage: $ ansible-playbook server_config.yml
+# Note see [inventory] and [ansible.cfg] for preset details
+
+---
+
+Add plays here
+
+
+...
