@@ -59,3 +59,6 @@
         key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICg1N3h0m0XujlaIn58Yv5d5EgA5u4wo2iwdtfTebMWg ansible
 
 ...
+
+
+  - private_key_file = ~/.ssh/ansible
