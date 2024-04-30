@@ -6,7 +6,9 @@
 #
 # Usage:
 #   $ ansible-playbook --key-file ~/.ssh/ansible  -i inventory bootstrap.yml -K
-
+# Now that there is a config file, to execute the tasks in this playbook or check for the correctness of its syntax
+# use the command ansible-playbook bootstrap.yaml to run the script and ansible-playbook
+# -syntax-check bootstrap.yaml to check for the correctness of the yaml syntax.
 
 ---
 
