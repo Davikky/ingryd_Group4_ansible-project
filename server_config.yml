@@ -17,11 +17,13 @@ Add plays here
       name: apache2
       state: present
     when: ansible_distribution == "Ubuntu"
+    
   - name: install php on apache
       apt:
        name: php
        state: present
      when: ansible_distribution == "Ubuntu"
+     
   - name: Install Apache on OracleLinux
     yum:
       name: httpd
