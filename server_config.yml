@@ -4,8 +4,8 @@
 
 ---
 
-- name: Update package cache for Ubuntu and Oracle Linux
-  hosts: all
+- name: Web Servers Configuration
+  hosts: web_servers
   become: yes
   tasks:
     - name: Update package cache for Ubuntu
@@ -29,24 +29,20 @@
       when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
       debug:
         msg: "Package cache updated for Oracle Linux."
-        
-- name: Install and configure Apache
-  hosts: all
-  become: true
-  tasks:
+
     - name: Install Apache on Ubuntu
       apt:
         name: apache2
         state: present
       when: ansible_distribution == "Ubuntu"
-    
+
     - name: Install PHP on Apache
       apt:
         name: php
         state: present
       when: ansible_distribution == "Ubuntu"
-     
-    - name: Install Apache on Oracle Linux
+
+    - name: Install Apache on OracleLinux
       yum:
         name: httpd
         state: present
@@ -59,7 +55,7 @@
         enabled: yes
       when: ansible_distribution == "Ubuntu"
 
-    - name: Start and enable Apache on Oracle Linux
+    - name: Start and enable Apache on OracleLinux
       service:
         name: httpd
         state: started
