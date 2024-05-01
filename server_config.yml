@@ -76,4 +76,43 @@
       mysql_user:
         name: root
         password: 'mySQLingryd'
-          
+
+
+- name: file_servers
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Samba
+      apt:
+        name: samba  
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Start and Enable samba service
+      service:
+        name: smb
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+      notify: restart samba
+
+    - name: Install Samba
+      dnf:
+        name: samba
+        state: present
+      when: ansible_distribution != "Ubuntu"
+
+    - name: Start and Enable samba service
+      service:
+        name: smb
+        state: started
+        enabled: yes
+      when: ansible_distribution != "Ubuntu"
+      notify: restart samba
+
+    - name: Open port for samba service
+      firewalld:
+        service: smb
+        permanent: yes
+        state: enabled
+        immediate: yes 
