@@ -36,6 +36,7 @@
     - name: Creating User admin
       user:
         name: admin
+        shell: bash
         group: admin1
         groups:
          - sudo
