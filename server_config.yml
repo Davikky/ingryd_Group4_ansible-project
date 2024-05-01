@@ -17,6 +17,7 @@
     - name: Update package cache for Oracle Linux
       when: ansible_os_family == 'RedHat'
       yum:
+        update_only: yes
         update_cache: yes
       register: oraclelinux_update_result
 
@@ -30,30 +31,22 @@
       debug:
         msg: "Package cache updated for Oracle Linux."
 
-    - name: Install Apache on Ubuntu
+    - name: Install apache2 & php packages
       apt:
-        name: apache2
-        state: present
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: latest
       when: ansible_distribution == "Ubuntu"
 
-    - name: Install PHP on Apache
-      apt:
-        name: php
-        state: present
-      when: ansible_distribution == "Ubuntu"
 
-    - name: Install Apache on OracleLinux
-      yum:
-        name: httpd
-        state: present
+    - name: Install apache2 & php packages
+      dnf:
+        name:
+          - httpd
+          - php
+        state: latest
       when: ansible_distribution == "OracleLinux"
-
-    - name: Start and enable Apache on Ubuntu
-      service:
-        name: apache2
-        state: started
-        enabled: yes
-      when: ansible_distribution == "Ubuntu"
 
     - name: Start and enable Apache on OracleLinux
       service:
@@ -61,3 +54,5 @@
         state: started
         enabled: yes
       when: ansible_distribution == "OracleLinux"
+
+...
