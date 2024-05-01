@@ -4,7 +4,30 @@
 
 ---
 
-Add plays here
+- name: Update package cache for Ubuntu and Oracle Linux
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package cache for Ubuntu
+      when: ansible_os_family == 'Debian'
+      apt:
+        update_cache: yes
+      register: ubuntu_update_result
 
+    - name: Update package cache for Oracle Linux
+      when: ansible_os_family == 'RedHat'
+      yum:
+        update_cache: yes
+      register: oraclelinux_update_result
 
+    - name: Display update results for Ubuntu
+      when: ubuntu_update_result is defined and ubuntu_update_result.changed
+      debug:
+        msg: "Package cache updated for Ubuntu."
+
+    - name: Display update results for Oracle Linux
+      when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
+      debug:
+        msg: "Package cache updated for Oracle Linux."
+        
 ...
