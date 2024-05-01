@@ -55,4 +55,25 @@
         enabled: yes
       when: ansible_distribution == "OracleLinux"
 
-...
+---
+
+- name: db_servers
+  hosts: node1,node2
+  become: true
+  tasks:
+    - name: Install MySQL database
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Start and enable MySQL
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+
+    - name: Assign password to root user
+      mysql_user:
+        name: root
+        password: 'mySQLingryd'
+          
