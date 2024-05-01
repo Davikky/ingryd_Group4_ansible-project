@@ -9,3 +9,5 @@ node2
 [file_servers]
 node1
 node2
+
+# Note: IP addresses of hosts have been added to /etc/hosts
