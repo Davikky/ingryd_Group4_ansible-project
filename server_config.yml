@@ -31,7 +31,7 @@
       debug:
         msg: "Package cache updated for Oracle Linux."
 
-    - name: Install apache2 & php packages
+    - name: Install apache2 & php packages (Ubuntu)
       apt:
         name:
           - apache2
@@ -40,7 +40,7 @@
       when: ansible_distribution == "Ubuntu"
 
 
-    - name: Install apache2 & php packages
+    - name: Install apache2 & php packages (OracleLinux)
       dnf:
         name:
           - httpd
@@ -55,7 +55,35 @@
         enabled: yes
       when: ansible_distribution == "OracleLinux"
 
----
+    - name: Update current ServerAdmin (OracleLiniux)
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin martin.mato@ingrydacademy.com
+      when: ansible_distribution == "OracleLinux"
+      register: httpd
+
+    - name: Restart httpd (OracleLinux)
+      tags: apache,httpd
+      service:
+        name: httpd
+        state: restarted
+      when: httpd.changed
+
+    - name: Update current ServerAdmin (Ubuntu)
+      lineinfile:
+        path: /etc/apache2/sites-available/000-default.conf
+        regexp: '^\s*ServerAdmin'
+        line: 'ServerAdmin martin.mato@ingrydacademy.com'
+      when: ansible_distribution == "Ubuntu"
+      register: apache_default_conf
+
+    - name: Reload Apache (Ubuntu)
+      service:
+        name: apache2
+        state: reloaded
+      when: apache_default_conf.changed
+
 
 - name: db_servers
   hosts: node1,node2
