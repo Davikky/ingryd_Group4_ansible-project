@@ -1,1 +1,86 @@
+    - name: Install apache and apache supporting software
+      block:
+        - name: Install apache2 & php packages (Ubuntu)
+          apt:
+            name:
+              - apache2
+              - libapache2-mod-php
+            state: latest
+          when: ansible_distribution == "Ubuntu"
 
+        - name: Install apache2 & php packages (Oracle Linux)
+          dnf:
+            name:
+              - httpd
+              - php
+            state: latest
+          when: ansible_distribution == "OracleLinux"
+
+    - name: Start and enable Apache (Oracle Linux)
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "OracleLinux"
+
+    - name: Update ServerAdmin in apache config file
+      block:
+        - name: Update current ServerAdmin (Oracle Linux)
+          lineinfile:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: '^ServerAdmin'
+            line: ServerAdmin martin.mato@ingrydacademy.com
+          when: ansible_distribution == "OracleLinux"
+          register: httpd
+
+        - name: Restart httpd (Oracle Linux)
+          tags: apache,httpd
+          service:
+            name: httpd
+            state: restarted
+          when: httpd.changed
+
+        - name: Update current ServerAdmin (Ubuntu)
+          lineinfile:
+            path: /etc/apache2/sites-available/000-default.conf
+            regexp: '^(\s*)ServerAdmin'
+            line: '         ServerAdmin martin.mato@ingrydacademy.com'
+          when: ansible_distribution == "Ubuntu"
+          register: apache_default_conf
+
+        - name: Reload Apache (Ubuntu)
+          service:
+            name: apache2
+            state: reloaded
+          when: apache_default_conf.changed
+ 
+    - name: Ensure http (port 80) and https (port 443) are open in the firewall
+      block:
+        - name: Open ports using UFW (Ubuntu)
+          ufw:
+            rule: allow
+            port: "{{ item }}"
+            state: enabled
+          loop:
+            - '80'
+            - '443'
+          when: ansible_distribution == "Ubuntu"
+
+        - name: Open ports using firewalld (Oracle Linux)
+          firewalld:
+            port: "{{ item }}/tcp"
+            permanent: yes
+            state: enabled
+            immediate: yes
+          loop:
+            - '80'
+            - '443'
+          when: ansible_distribution == "OracleLinux"
+
+    - name: Start and Enable the firewall service
+      service:
+        name: "{{ firewall_service }}"
+        state: started
+        enabled: yes
+      vars:
+        firewall_service: "{{ 'ufw' if ansible_distribution == 'Ubuntu' else 'firewalld' }}"
