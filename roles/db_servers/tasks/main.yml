@@ -15,14 +15,14 @@
          name:
            - python3-pip, python3-virtualenv,python3-wheel, gcc
            - python3-dev, default-libmysqlclient-dev, build-essential, pkg-config
-        when: ansible_distribution == "Ubuntu"
+       when: ansible_distribution == "Ubuntu"
 
      -  name: Install user requirements for mysql (Oracle Linux)
        dnf:
          name:
            - python3-pip, python3-virtualenv,python3-wheel, gcc
            - python3-dev, mysql-devel, build-essential, pkgconfig
-        when: ansible_distribution == "OracleLinux"       
+       when: ansible_distribution == "OracleLinux"       
 
      - name: Install mysqlclient python package
        ansible.bulletin.pip:
