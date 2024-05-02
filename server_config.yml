@@ -8,139 +8,169 @@
   hosts: web_servers
   become: yes
   tasks:
-    - name: Update package cache for Ubuntu
-      when: ansible_os_family == 'Debian'
-      apt:
-        update_cache: yes
-      register: ubuntu_update_result
 
-    - name: Update package cache for Oracle Linux
-      when: ansible_os_family == 'RedHat'
-      yum:
-        update_only: yes
-        update_cache: yes
-      register: oraclelinux_update_result
+    - name: Update package cache
+      block:
+        - name: Update package cache for Ubuntu
+          when: ansible_os_family == 'Debian'
+          apt:
+            update_cache: yes
+          register: ubuntu_update_result
 
-    - name: Display update results for Ubuntu
-      when: ubuntu_update_result is defined and ubuntu_update_result.changed
-      debug:
-        msg: "Package cache updated for Ubuntu."
+        - name: Display update results for Ubuntu
+          when: ubuntu_update_result is defined and ubuntu_update_result.changed
+          debug:
+            msg: "Package cache updated for Ubuntu."
 
-    - name: Display update results for Oracle Linux
-      when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
-      debug:
-        msg: "Package cache updated for Oracle Linux."
+        - name: Update package cache for Oracle Linux
+          when: ansible_os_family == 'RedHat'
+          yum:
+            update_only: yes
+            update_cache: yes
+          register: oraclelinux_update_result
 
-    - name: Install apache2 & php packages (Ubuntu)
-      apt:
-        name:
-          - apache2
-          - libapache2-mod-php
-        state: latest
-      when: ansible_distribution == "Ubuntu"
+        - name: Display update results for Oracle Linux
+          when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
+          debug:
+            msg: "Package cache updated for Oracle Linux."
 
+    - name: Installs apache and apache supporting software
+      block:
+        - name: Install apache2 & php packages (Ubuntu)
+          apt:
+            name:
+              - apache2
+              - libapache2-mod-php
+            state: latest
+          when: ansible_distribution == "Ubuntu"
 
-    - name: Install apache2 & php packages (OracleLinux)
-      dnf:
-        name:
-          - httpd
-          - php
-        state: latest
-      when: ansible_distribution == "OracleLinux"
+        - name: Install apache2 & php packages (Oracle Linux)
+          dnf:
+            name:
+              - httpd
+              - php
+            state: latest
+          when: ansible_distribution == "OracleLinux"
 
-    - name: Start and enable Apache on OracleLinux
+    - name: Start and enable Apache (Oracle Linux)
       service:
         name: httpd
         state: started
         enabled: yes
       when: ansible_distribution == "OracleLinux"
 
-    - name: Update current ServerAdmin (OracleLiniux)
-      lineinfile:
-        path: /etc/httpd/conf/httpd.conf
-        regexp: '^ServerAdmin'
-        line: ServerAdmin martin.mato@ingrydacademy.com
-      when: ansible_distribution == "OracleLinux"
-      register: httpd
+    - name: Update ServerAdmin in apache config file
+      block:
+        - name: Update current ServerAdmin (Oracle Liniux)
+          lineinfile:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: '^ServerAdmin'
+            line: ServerAdmin martin.mato@ingrydacademy.com
+          when: ansible_distribution == "OracleLinux"
+          register: httpd
 
-    - name: Restart httpd (OracleLinux)
-      tags: apache,httpd
+        - name: Restart httpd (OracleLinux)
+          tags: apache,httpd
+          service:
+            name: httpd
+            state: restarted
+          when: httpd.changed
+
+        - name: Update current ServerAdmin (Ubuntu)
+          lineinfile:
+            path: /etc/apache2/sites-available/000-default.conf
+            regexp: '^(\s*)ServerAdmin'
+            line: '         ServerAdmin martin.mato@ingrydacademy.com'
+          when: ansible_distribution == "Ubuntu"
+          register: apache_default_conf
+
+        - name: Reload Apache (Ubuntu)
+          service:
+            name: apache2
+            state: reloaded
+          when: apache_default_conf.changed
+
+    - name: Ensure http (port 80) and https (port 443) are open in the firewall
+      block:
+        - name: Open ports using UFW (Ubuntu)
+          ufw:
+            rule: allow
+            port: "{{ item }}"
+            state: enabled
+          loop:
+            - '80'
+            - '443'
+          when: ansible_distribution == "Ubuntu"
+
+        - name: Open ports using firewalld (Oracle Linux)
+          firewalld:
+            port: "{{ item }}/tcp"
+            permanent: yes
+            state: enabled
+            immediate: yes
+          loop:
+            - '80'
+            - '443'
+          when: ansible_distribution == "OracleLinux"
+
+    - name: Start and Enable the firewall service
       service:
-        name: httpd
-        state: restarted
-      when: httpd.changed
-
-    - name: Update current ServerAdmin (Ubuntu)
-      lineinfile:
-        path: /etc/apache2/sites-available/000-default.conf
-        regexp: '^\s*ServerAdmin'
-        line: 'ServerAdmin martin.mato@ingrydacademy.com'
-      when: ansible_distribution == "Ubuntu"
-      register: apache_default_conf
-
-    - name: Reload Apache (Ubuntu)
-      service:
-        name: apache2
-        state: reloaded
-      when: apache_default_conf.changed
-
-
-- name: db_servers
-  hosts: node1,node2
-  become: true
-  tasks:
-    - name: Install MySQL database
-      apt:
-        name: mysql-server
-        state: present
-
-    - name: Start and enable MySQL
-      service:
-        name: mysqld
+        name: "{{ firewall_service }}"
         state: started
         enabled: yes
+      vars:
+        firewall_service: "{{ 'ufw' if ansible_distribution == 'Ubuntu' else 'firewalld' }}"
 
-    - name: Assign password to root user
-      mysql_user:
-        name: root
-        password: 'mySQLingryd'
+  
+    - name: db_servers
+      hosts: node1,node2
+      become: true
+      tasks:
+        - name: Install MySQL database
+          apt:
+            name: mysql-server
+            state: present
+
+        - name: Start and enable MySQL
+          service:
+            name: mysqld
+            state: started
+            enabled: yes
+
+        - name: Assign password to root user
+          mysql_user:
+            name: root
+            password: 'mySQLingryd'
 
 
-- name: file_servers
-  hosts: all
-  become: true
-  tasks:
-    - name: Install Samba
-      apt:
-        name: samba  
-        state: present
-      when: ansible_distribution == "Ubuntu"
+    - name: file_servers
+      hosts: all
+      become: true
+      tasks:
+        - name: Install Samba
+          apt:
+            name: samba  
+            state: present
+          when: ansible_distribution == "Ubuntu"
 
-    - name: Start and Enable samba service
-      service:
-        name: smb
-        state: started
-        enabled: yes
-      when: ansible_distribution == "Ubuntu"
-      notify: restart samba
+        - name: Start and Enable samba service
+          service:
+            name: smb
+            state: started
+            enabled: yes
+          when: ansible_distribution == "Ubuntu"
+          notify: restart samba
 
-    - name: Install Samba
-      dnf:
-        name: samba
-        state: present
-      when: ansible_distribution != "Ubuntu"
+        - name: Install Samba
+          dnf:
+            name: samba
+            state: present
+          when: ansible_distribution != "Ubuntu"
 
-    - name: Start and Enable samba service
-      service:
-        name: smb
-        state: started
-        enabled: yes
-      when: ansible_distribution != "Ubuntu"
-      notify: restart samba
-
-    - name: Open port for samba service
-      firewalld:
-        service: smb
-        permanent: yes
-        state: enabled
-        immediate: yes 
+        - name: Start and Enable samba service
+          service:
+            name: smb
+            state: started
+            enabled: yes
+              
+...
