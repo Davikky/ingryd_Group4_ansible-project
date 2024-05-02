@@ -234,5 +234,24 @@
       get_url:
         url: "https://download.jetbrains.com/python/pycharm-community-2021.3.2.tar.gz"
         dest: "/usr/local/bin/pycharm-community-2021.3.2.tar.gz"
+
+- name: Transfer passwords file to all nodes
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Copy encrypted passwords file to each node
+      copy:
+        src: passwords
+        dest: "{{ ansible_env.HOME }}/passwords"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user  }}"
+        mode: '0600'  # Set permissions to restrict access to the file
+
+    - name: Decrypt passwords file on each node
+      ansible.builtin.command: ansible-vault decrypt "{{ ansible_env.HOME }}/passwords"
+
+# Note: ansible-vault-password has been saved in ~/.ssh/ansible-vault-password and 
+# path was added to environment variable in ~/.bashrc
           
 ...
