@@ -1,1 +1,24 @@
+    - name: Update package cache
+      block:
+        - name: Update package cache for Ubuntu
+          when: ansible_os_family == 'Debian'
+          apt:
+            update_cache: yes
+          register: ubuntu_update_result
 
+        - name: Display update results for Ubuntu
+          when: ubuntu_update_result is defined and ubuntu_update_result.changed
+          debug:
+            msg: "Package cache updated for Ubuntu."
+
+        - name: Update package cache for Oracle Linux
+          when: ansible_os_family == 'RedHat'
+          dnf:
+            update_only: yes
+            update_cache: yes
+          register: oraclelinux_update_result
+
+        - name: Display update results for Oracle Linux
+          when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
+          debug:
+            msg: "Package cache updated for Oracle Linux."
