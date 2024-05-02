@@ -122,71 +122,54 @@
         firewall_service: "{{ 'ufw' if ansible_distribution == 'Ubuntu' else 'firewalld' }}"
 
   
-    - name: db_servers
-      hosts: node1,node2
-      become: true
-      tasks:
-        - name: Install MySQL database
-          apt:
-            name: mysql-server
-            state: present
+- name: Database configuration
+  hosts: db_servers
+  become: true
+  tasks:
 
-        - name: Start and enable MySQL
-          service:
-            name: mysqld
-            state: started
-            enabled: yes
+    - name: Install MySQL database
+      apt:
+        name: mysql-server
+        state: present
 
-        - name: Assign password to root user
-          mysql_user:
-            name: root
-            password: 'mySQLingryd'
+    - name: Start and enable MySQL
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
 
-
-    - name: file_servers
-      hosts: all
-      become: true
-      tasks:
-        - name: Install Samba
-          apt:
-            name: samba  
-            state: present
-          when: ansible_distribution == "Ubuntu"
-
-        - name: Start and Enable samba service
-          service:
-            name: smb
-            state: started
-            enabled: yes
-          when: ansible_distribution == "Ubuntu"
-          notify: restart samba
-
-        - name: Install Samba
-          dnf:
-            name: samba
-            state: present
-          when: ansible_distribution != "Ubuntu"
-
-        - name: Start and Enable samba service
-          service:
-            name: smb
-            state: started
-            enabled: yes
-          when: ansible_distribution != "Ubuntu"
-          notify: restart samba
-
-        - name: Open port for samba service
-          firewalld:
-            service: smb
-            permanent: yes
-            state: enabled
-            immediate: yes 
+    - name: Assign password to root user
+      mysql_user:
+        name: root
+        password: 'mySQLingryd'
 
 
+- name: File configuration
+  hosts: file_servers
+  become: true
+  tasks:
+    - name: Install Samba
+      package:
+        name: samba  
+        state: present
+   
+    - name: Start and Enable samba service
+      service:
+        name: smb
+        state: started
+        enabled: yes
+      when: ansible_distribution != "Ubuntu"
 
-        - name: Open Samba ports in firewall
-          ansible.posix.firewalld:
-            port: 137-445/tcp
-            permanent: true
-            state: enabled
+    - name: Open port for samba service
+      firewalld:
+        service: smb
+        permanent: yes
+        state: enabled
+        immediate: yes 
+
+    - name: Open Samba ports in firewall
+      ansible.posix.firewalld:
+        port: 137-445/tcp
+        permanent: true
+        state: enabled
 ...
