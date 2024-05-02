@@ -224,4 +224,15 @@
             state: enabled
           when: ansible_distribution == "OracleLinux"
 
+    - name: Copy admin_manual file to /usr/local/bin directory
+      copy:
+        src: admin_manual
+        dest: /usr/local/bin/admin_manual
+        mode: 0755
+
+    - name: Download PyCharm Community Edition and save in /usr/local/bin
+      get_url:
+        url: "https://download.jetbrains.com/python/pycharm-community-2021.3.2.tar.gz"
+        dest: "/usr/local/bin/pycharm-community-2021.3.2.tar.gz"
+          
 ...
