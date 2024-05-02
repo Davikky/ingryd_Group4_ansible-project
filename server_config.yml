@@ -32,7 +32,7 @@
         - name: Update package cache for Oracle Linux
           # Updates the package cache for Oracle Linux servers using the 'yum' module.
           when: ansible_os_family == 'RedHat'
-          yum:
+          dnf:
             update_only: yes
             update_cache: yes
           register: oraclelinux_update_result
@@ -168,8 +168,18 @@
         enabled: yes
       when: mysql_installed_ubuntu is defined and mysql_installed_ubuntu.changed
 
+    - name: Add MySQL Yum repository
+      yum_repository:
+        name: mysql
+        description: MySQL Yum Repository
+        baseurl: https://repo.mysql.com/mysql80-community-release-el{{ ansible_distribution_major_version }}-3.noarch.rpm
+        gpgkey: https://repo.mysql.com/RPM-GPG-KEY-mysql
+        enabled: yes
+      when: ansible_distribution == "OracleLinux"
+    
+
     - name: Install MySQL database (Oracle Linux)
-      dnf:
+      yum:
         name: mysql-community-server
         state: present
       when: ansible_distribution == "OracleLinux"
