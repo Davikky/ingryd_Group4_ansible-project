@@ -8,24 +8,24 @@
   hosts: all
   become: true
   roles:
-    base
+    - base
 
 
 - name: Web Servers Configuration
   hosts: web_servers
   become: yes
   roles:
-    web_servers
+    - web_servers
 
 - name: Database configuration
   hosts: db_servers
   become: true
   roles:
-    db_servers
+    - db_servers
 
 - name: File configuration
   hosts: file_servers
   become: true
   roles:
-    file_servers         
+    - file_servers         
 ...
