@@ -1,28 +1,36 @@
-# ansible playbook: server_config.yml
+# Ansible Playbook: server_config.yml
+# This playbook is designed to configure various types of servers, including web servers, database servers, and file servers.
 # Usage: $ ansible-playbook server_config.yml
 # Note: see [inventory] and [ansible.cfg] for preset details
 
 ---
 
+# Configuration for Web Servers
 - name: Web Servers Configuration
+  # This play targets servers designated as web servers.
   hosts: web_servers
   become: yes
   tasks:
 
+    # Task: Update package cache
     - name: Update package cache
+      # This task updates the package cache on Ubuntu and Oracle Linux servers.
       block:
         - name: Update package cache for Ubuntu
+          # Updates the package cache for Ubuntu servers using the 'apt' module.
           when: ansible_os_family == 'Debian'
           apt:
             update_cache: yes
           register: ubuntu_update_result
 
         - name: Display update results for Ubuntu
+          # Displays a message if the package cache was updated for Ubuntu servers.
           when: ubuntu_update_result is defined and ubuntu_update_result.changed
           debug:
             msg: "Package cache updated for Ubuntu."
 
         - name: Update package cache for Oracle Linux
+          # Updates the package cache for Oracle Linux servers using the 'yum' module.
           when: ansible_os_family == 'RedHat'
           yum:
             update_only: yes
@@ -30,11 +38,14 @@
           register: oraclelinux_update_result
 
         - name: Display update results for Oracle Linux
+          # Displays a message if the package cache was updated for Oracle Linux servers.
           when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
           debug:
             msg: "Package cache updated for Oracle Linux."
 
+    # Task: Install Apache and supporting software
     - name: Installs apache and apache supporting software
+      # This task installs Apache web server and PHP on Ubuntu and Oracle Linux servers.
       block:
         - name: Install apache2 & php packages (Ubuntu)
           apt:
@@ -52,16 +63,21 @@
             state: latest
           when: ansible_distribution == "OracleLinux"
 
+    # Task: Start and enable Apache
     - name: Start and enable Apache (Oracle Linux)
+      # This task starts and enables Apache service on Oracle Linux servers.
       service:
         name: httpd
         state: started
         enabled: yes
       when: ansible_distribution == "OracleLinux"
 
+    # Task: Update ServerAdmin in apache config file
     - name: Update ServerAdmin in apache config file
+      # This task updates the ServerAdmin directive in Apache config file based on the distribution.
       block:
-        - name: Update current ServerAdmin (Oracle Liniux)
+        - name: Update current ServerAdmin (Oracle Linux)
+          # Updates ServerAdmin in httpd.conf for Oracle Linux servers.
           lineinfile:
             path: /etc/httpd/conf/httpd.conf
             regexp: '^ServerAdmin'
@@ -69,7 +85,8 @@
           when: ansible_distribution == "OracleLinux"
           register: httpd
 
-        - name: Restart httpd (OracleLinux)
+        - name: Restart httpd (Oracle Linux)
+          # Restarts httpd service if the ServerAdmin was updated.
           tags: apache,httpd
           service:
             name: httpd
@@ -77,6 +94,7 @@
           when: httpd.changed
 
         - name: Update current ServerAdmin (Ubuntu)
+          # Updates ServerAdmin in 000-default.conf for Ubuntu servers.
           lineinfile:
             path: /etc/apache2/sites-available/000-default.conf
             regexp: '^(\s*)ServerAdmin'
@@ -85,14 +103,18 @@
           register: apache_default_conf
 
         - name: Reload Apache (Ubuntu)
+          # Reloads Apache service if the ServerAdmin was updated.
           service:
             name: apache2
             state: reloaded
           when: apache_default_conf.changed
 
+    # Task: Ensure http (port 80) and https (port 443) are open in the firewall
     - name: Ensure http (port 80) and https (port 443) are open in the firewall
+      # This task opens ports 80 and 443 in the firewall for web servers.
       block:
         - name: Open ports using UFW (Ubuntu)
+          # Opens ports using UFW on Ubuntu servers.
           ufw:
             rule: allow
             port: "{{ item }}"
@@ -103,6 +125,7 @@
           when: ansible_distribution == "Ubuntu"
 
         - name: Open ports using firewalld (Oracle Linux)
+          # Opens ports using firewalld on Oracle Linux servers.
           firewalld:
             port: "{{ item }}/tcp"
             permanent: yes
@@ -113,7 +136,9 @@
             - '443'
           when: ansible_distribution == "OracleLinux"
 
+    # Task: Start and Enable the firewall service
     - name: Start and Enable the firewall service
+      # This task starts and enables the firewall service based on the distribution.
       service:
         name: "{{ firewall_service }}"
         state: started
@@ -122,60 +147,59 @@
         firewall_service: "{{ 'ufw' if ansible_distribution == 'Ubuntu' else 'firewalld' }}"
 
   
+# Configuration for Database Servers
 - name: Database configuration
+  # This play configures servers designated as database servers.
   hosts: db_servers
   become: true
   tasks:
 
-    - name: Install MySQL database (Ubuntu)
+    # Task: Install MySQL database
+    - name: Install MySQL database
+      # This task installs MySQL server.
       apt:
         name: mysql-server
         state: present
-      when: ansible_distribution == "Ubuntu"
-      register: mysql_installed_ubuntu
 
-    - name: Start and enable MySQL service (Ubuntu)
-      service:
-        name: mysql
-        state: started
-        enabled: yes
-      when: mysql_installed_ubuntu is defined and mysql_installed_ubuntu.changed
-
-    - name: Install MySQL database (Oracle Linux)
-      dnf:
-        name: mysql-community-server
-        state: present
-      when: ansible_distribution == "OracleLinux"
-      register: mysql_installed_oracle
-
-    - name: Start and enable MySQL service
+    # Task: Start and enable MySQL
+    - name: Start and enable MySQL
+      # This task starts and enables the MySQL service.
       service:
         name: mysqld
         state: started
         enabled: yes
-      when: mysql_installed_oracle is defined and mysql_installed_oracle.changed
 
+    # Task: Assign password to root user
     - name: Assign password to root user
+      # This task assigns a password to the root user in MySQL.
       mysql_user:
         name: root
         password: 'mySQLingryd'
 
 
+# Configuration for File Servers
 - name: File configuration
+  # This play configures servers designated as file servers.
   hosts: file_servers
   become: true
   tasks:
+
+    # Task: Install Samba
     - name: Install Samba
+      # This task installs the Samba package.
       package:
         name: samba  
         state: present
    
+    # Task: Start and Enable samba service
     - name: Start and Enable samba service
+      # This task starts and enables the Samba service.
       service:
         name: "{{ 'smb' if ansible_distribution == 'OracleLinux' else 'smbd' }}"
         state: started
         enabled: yes
 
+    # Task: Open port for samba service
     - name: Open port for samba service
       block:
         - name: Allow Samba ports in UFW
