@@ -172,5 +172,21 @@
             name: smb
             state: started
             enabled: yes
-              
+          when: ansible_distribution != "Ubuntu"
+          notify: restart samba
+
+        - name: Open port for samba service
+          firewalld:
+            service: smb
+            permanent: yes
+            state: enabled
+            immediate: yes 
+
+
+
+        - name: Open Samba ports in firewall
+          ansible.posix.firewalld:
+            port: 137-445/tcp
+            permanent: true
+            state: enabled
 ...
