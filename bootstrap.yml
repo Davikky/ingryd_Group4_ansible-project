@@ -29,7 +29,7 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - admin1
+        - admin
         - adm
         - sudo
 
@@ -37,7 +37,7 @@
       user:
         name: admin
         shell: /bin/bash
-        group: admin1
+        group: admin
         groups:
          - sudo
          - adm

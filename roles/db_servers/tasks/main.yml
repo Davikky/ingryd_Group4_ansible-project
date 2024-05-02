@@ -1,34 +1,42 @@
-    - name: Install MySQL database
-      package:
-        name: mysql-server
-        state: latest
+- name: Install MySQL database (Ubuntu)
+  apt:
+    name: mysql-server
+    state: present
+  when: ansible_distribution == "Ubuntu"
 
-    - name: Start and enable MySQL service (Oracle Linux)
-      service:
-        name: mysqld
-        state: started
-        enabled: yes
-      when: ansible_distribution == "OracleLinux"
+- name: Install MySQL database (Oracle Linux)
+  yum:
+    name: mysql-server
+    state: present
+    allowerasing: yes
+  when: ansible_distribution == "OracleLinux"
 
-    - name: Install user requirements for mysql (Ubuntu)
-       apt:
-        name:
-           - python3-pip, python3-virtualenv,python3-wheel, gcc
-           - python3-dev, default-libmysqlclient-dev, build-essential, pkg-config
-       when: ansible_distribution == "Ubuntu"
+- name: Start and enable MySQL service (Oracle Linux)
+  service:
+    name: mysqld
+    state: started
+    enabled: yes
+  when: ansible_distribution == "OracleLinux"
 
-    - name: Install user requirements for mysql (Oracle Linux)
-       dnf:
-        name:
-           - python3-pip, python3-virtualenv,python3-wheel, gcc
-           - python3-dev, mysql-devel, build-essential, pkgconfig
-       when: ansible_distribution == "OracleLinux"       
+- name: Install user requirements for mysql (Ubuntu)
+  apt:
+    name:
+       - python3-pip, python3-virtualenv,python3-wheel, gcc
+       - python3-dev, default-libmysqlclient-dev, build-essential, pkg-config
+  when: ansible_distribution == "Ubuntu"
 
-    - name: Install mysqlclient python package
-      ansible.bulletin.pip:
-        name: mysqlclient
- 
-    - name: Assign password to root user
-      mysql_user:
-        name: root
-        password: 'mySQLingryd'
+- name: Install user requirements for mysql (Oracle Linux)
+  dnf:
+    name:
+      - python3-pip, python3-virtualenv,python3-wheel, gcc
+      - python3-devel, mysql-devel,pkgconfig
+  when: ansible_distribution == "OracleLinux"       
+
+- name: Install mysqlclient python package
+  ansible.builtin.pip:
+    name: mysqlclient
+
+- name: Assign password to root user
+  mysql_user:
+    name: root
+    password: 'mySQLingryd'

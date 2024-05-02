@@ -1,45 +1,45 @@
-    - name: Install Samba
-      package:
-        name: samba  
-        state: present
-   
-    - name: Start and Enable samba service
-      service:
-        name: "{{ 'smb' if ansible_distribution == 'OracleLinux' else 'smbd' }}"
-        state: started
-        enabled: yes
+- name: Install Samba
+  package:
+    name: samba  
+    state: present
 
-    - name: Open port for samba service
-      block:
-        - name: Allow Samba ports in UFW
-          ufw:
-            rule: allow
-            port: 137:445/tcp
-            comment: "Allow Samba ports in ufw"
-          when: ansible_distribution == "Ubuntu"
+- name: Start and Enable samba service
+  service:
+    name: "{{ 'smbd' if ansible_distribution == 'OracleLinux' else 'smb' }}"
+    state: started
+    enabled: yes
 
-        - name: Enable Samba service in firewalld
-          firewalld:
-            service: smb
-            permanent: yes
-            state: enabled
-            immediate: yes
-          when: ansible_distribution == "OracleLinux"
+- name: Open port for samba service
+  block:
+    - name: Allow Samba ports in UFW
+      ufw:
+        rule: allow
+        port: '137:445/tcp'
+        comment: "Allow Samba ports in ufw"
+      when: ansible_distribution == "Ubuntu"
 
-        - name: Open Samba ports in firewall
-          ansible.posix.firewalld:
-            port: 137-445/tcp
-            permanent: true
-            state: enabled
-          when: ansible_distribution == "OracleLinux"
+    - name: Enable Samba service in firewalld
+      firewalld:
+        service: smb
+        permanent: yes
+        state: enabled
+        immediate: yes
+      when: ansible_distribution == "OracleLinux"
 
-    - name: Copy admin_manual file to /usr/local/bin directory
-      copy:
-        src: admin_manual
-        dest: /usr/local/bin/admin_manual
-        mode: 0755
+    - name: Open Samba ports in firewall
+      ansible.posix.firewalld:
+        port: '137-445/tcp'
+        permanent: true
+        state: enabled
+      when: ansible_distribution == "OracleLinux"
 
-    - name: Download PyCharm Community Edition and save in /usr/local/bin
-      get_url:
-        url: "https://download.jetbrains.com/python/pycharm-community-2021.3.2.tar.gz"
-        dest: "/usr/local/bin/pycharm-community-2021.3.2.tar.gz"
+- name: Copy admin_manual file to /usr/local/bin directory
+  copy:
+    src: admin_manual
+    dest: /usr/local/bin/admin_manual
+    mode: 0755
+
+- name: Download PyCharm Community Edition and save in /usr/local/bin
+  get_url:
+    url: "https://download.jetbrains.com/python/pycharm-community-2021.3.2.tar.gz"
+    dest: "/usr/local/bin/pycharm-community-2021.3.2.tar.gz"

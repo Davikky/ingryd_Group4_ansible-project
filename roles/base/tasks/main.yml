@@ -1,38 +1,36 @@
-    - name: Update package cache
-      block:
-        - name: Update package cache for Ubuntu
-          when: ansible_os_family == 'Debian'
-          apt:
-            update_cache: yes
-          register: ubuntu_update_result
+- name: Update package cache
+  block:
+    - name: Update package cache for Ubuntu
+      when: ansible_os_family == 'Debian'
+      apt:
+        update_cache: yes
+      register: ubuntu_update_result
 
-        - name: Display update results for Ubuntu
-          when: ubuntu_update_result is defined and ubuntu_update_result.changed
-          debug:
-            msg: "Package cache updated for Ubuntu."
+    - name: Display update results for Ubuntu
+      when: ubuntu_update_result is defined and ubuntu_update_result.changed
+      debug:
+        msg: "Package cache updated for Ubuntu."
 
-        - name: Update package cache for Oracle Linux
-          when: ansible_os_family == 'RedHat'
-          dnf:
-            update_only: yes
-            update_cache: yes
-          register: oraclelinux_update_result
+    - name: Update package cache for Oracle Linux
+      when: ansible_os_family == 'RedHat'
+      dnf:
+        update_only: yes
+        update_cache: yes
+      register: oraclelinux_update_result
 
-        - name: Display update results for Oracle Linux
-          when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
-          debug:
-            msg: "Package cache updated for Oracle Linux."
+    - name: Display update results for Oracle Linux
+      when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
+      debug:
+        msg: "Package cache updated for Oracle Linux."
 
-    - name: Copy encrypted passwords file to each node
-      copy:
-        src: passwords
-        dest: "{{ ansible_env.HOME }}/passwords"
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user  }}"
-        mode: '0600'  # Set permissions to restrict access to the file
-
-    - name: Decrypt passwords file on each node
-      ansible.builtin.command: ansible-vault decrypt "{{ ansible_env.HOME }}/passwords"
+- name: Copy encrypted passwords file to each node
+  ansible.builtin.copy:
+    src: passwords.yml
+    dest: "/home/{{ ansible_user}}/passwords.yml"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user  }}"
+    mode: '0600'  # Set permissions to restrict access to the file
+    backup: yes
 
 # Note: ansible-vault-password has been saved in ~/.ssh/ansible-vault-password and 
 # path was added to environment variable in ~/.bashrc
