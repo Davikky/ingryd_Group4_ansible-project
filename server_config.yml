@@ -144,3 +144,11 @@
         permanent: yes
         state: enabled
         immediate: yes 
+
+
+
+    - name: Open Samba ports in firewall
+      ansible.posix.firewalld:
+        port: 137-445/tcp
+        permanent: true
+        state: enabled
