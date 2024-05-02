@@ -168,14 +168,6 @@
         enabled: yes
       when: mysql_installed_ubuntu is defined and mysql_installed_ubuntu.changed
 
-    - name: Add MySQL Yum repository
-      yum:
-        name: "https://dev.mysql.com/get/mysql80-community-release-el{{ ansible_distribution_major_version }}-{{ version_number }}.noarch.rpm"
-        state: present
-      vars:
-        version_number: "1"  # Replace with the appropriate version number
-      when: ansible_distribution == "OracleLinux"
-        
         #    - name: Install MySQL database (Oracle Linux)
         #      yum:
         #        name: mysql
