@@ -8,7 +8,12 @@
 	$ git clone https://github.com/Davikky/ingryd_Group4_ansible-project.git  
 
 - *Run the bootstrap file:*  
-	$ ansible-playbook bootstrap.yml  
+	$ ansible-playbook bootstrap.yml -u [remote_user] -K  
+  	Note: [remote_user] must be present on all nodes and with sudoer privilege.  
+	Also, each [remote-user] must have the same password
+
+- *Copy ansible private key to your ssh dir:*
+  	$ cp ./files/used_passwords/ansible ~/.ssh/.
 
 - *Run the server_configuration file:*  
 	$ ansible-playbook server_config.yml  
