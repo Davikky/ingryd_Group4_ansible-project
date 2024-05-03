@@ -1,6 +1,8 @@
 - name: Install apache and apache supporting software
+  tags: apache_installation
   block:
     - name: Install apache2 & php packages (Ubuntu)
+      tags: ubuntu_apache
       apt:
         name:
           - apache2
@@ -9,6 +11,7 @@
       when: ansible_distribution == "Ubuntu"
 
     - name: Install apache2 & php packages (Oracle Linux)
+      tags: oraclelinux_apache
       dnf:
         name:
           - httpd
@@ -17,6 +20,7 @@
       when: ansible_distribution == "OracleLinux"
 
 - name: Start and enable Apache (Oracle Linux)
+  tags: apache_start_oraclelinux
   service:
     name: httpd
     state: started
@@ -24,8 +28,10 @@
   when: ansible_distribution == "OracleLinux"
 
 - name: Update ServerAdmin in apache config file
+  tags: apache_update_serveradmin
   block:
     - name: Update current ServerAdmin (Oracle Linux)
+      tags: oraclelinux_serveradmin
       lineinfile:
         path: /etc/httpd/conf/httpd.conf
         regexp: '^ServerAdmin'
@@ -34,13 +40,14 @@
       register: httpd
 
     - name: Restart httpd (Oracle Linux)
-      tags: apache,httpd
+      tags: apache_restart_oraclelinux
       service:
         name: httpd
         state: restarted
       when: httpd.changed
 
     - name: Update current ServerAdmin (Ubuntu)
+      tags: ubuntu_serveradmin
       lineinfile:
         path: /etc/apache2/sites-available/000-default.conf
         regexp: '^(\s*)ServerAdmin'
@@ -49,14 +56,17 @@
       register: apache_default_conf
 
     - name: Reload Apache (Ubuntu)
+      tags: apache_reload_ubuntu
       service:
         name: apache2
         state: reloaded
       when: apache_default_conf.changed
 
 - name: Ensure http (port 80) and https (port 443) are open in the firewall
+  tags: firewall_open_ports
   block:
     - name: Open ports using UFW (Ubuntu)
+      tags: ubuntu_firewall
       ufw:
         rule: allow
         port: "{{ item }}"
@@ -67,6 +77,7 @@
       when: ansible_distribution == "Ubuntu"
 
     - name: Open ports using firewalld (Oracle Linux)
+      tags: oraclelinux_firewall
       firewalld:
         port: "{{ item }}/tcp"
         permanent: yes
@@ -78,9 +89,11 @@
       when: ansible_distribution == "OracleLinux"
 
 - name: Start and Enable the firewall service
+  tags: firewall_service_start
   service:
     name: "{{ firewall_service }}"
     state: started
     enabled: yes
   vars:
     firewall_service: "{{ 'ufw' if ansible_distribution == 'Ubuntu' else 'firewalld' }}"
+
