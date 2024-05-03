@@ -1,6 +1,6 @@
-<img src="https://raw.githubusercontent.com/Davikky/ingryd_Group4_ansible-project/main/Group4-ansible.PNG" alt="Group4-ansible" style="width:50%; height:auto;">  
+![Group4-ansible](https://raw.githubusercontent.com/Davikky/ingryd_Group4_ansible-project/main/Group4-ansible.PNG)  
 
-# Ingryd Linux/DevOps class -Jan 2024 Cohort
+# Ingryd Linux/DevOps Class -Jan 2024 Cohort
 ## Group 4 on Ansible (Project 2)
 
 **Usages:**
