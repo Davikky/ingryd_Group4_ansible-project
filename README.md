@@ -12,8 +12,10 @@
   	Note: [remote_user] must be present on all nodes and with sudoer privilege.  
 	Also, each [remote-user] must have the same password
 
-- *Copy ansible private key to your ssh dir:*
-  	$ cp ./files/used_passwords/ansible ~/.ssh/.
+- *Check to ensure that ansible private key exists in your ssh dir (copy public key to your nodes where necessary):*  
+  	$ ls ~/.ssh | grep ansible  
+  	$ ssh-copy-id -i ~/.ssh/ansible	[node1]  
+  	$ ssh-copy-id -i ~/.ssh/ansible [node2]  
 
 - *Run the server_configuration file:*  
 	$ ansible-playbook server_config.yml  
