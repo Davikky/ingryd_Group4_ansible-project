@@ -36,7 +36,25 @@
   ansible.builtin.pip:
     name: mysqlclient
 
-- name: Assign password to root user
+- name: Assign password to root user (Ubuntu)
   mysql_user:
     name: root
     password: 'mySQLingryd'
+    host: localhost
+    login_user: root
+    login_password: ""
+  when: ansible_distribution == "Ubuntu"
+
+- name: Assign password to root user (Oracle Linux)
+  mysql_user:
+    name: admin
+    password: ''
+    host: localhost
+    login_user: root
+    login_password: 'mySQLingryd'
+    state: present
+    plugin: 'mysql_native_password'
+  when: ansible_distribution == "OracleLinux"
+
+
+

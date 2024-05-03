@@ -5,33 +5,30 @@
 
 - name: Start and Enable samba service
   service:
-    name: "{{ 'smbd' if ansible_distribution == 'OracleLinux' else 'smb' }}"
+    name: "{{ 'smb' if ansible_distribution == 'OracleLinux' else 'smbd' }}"
     state: started
     enabled: yes
 
-- name: Open port for samba service
-  block:
-    - name: Allow Samba ports in UFW
-      ufw:
-        rule: allow
-        port: '137:445/tcp'
-        comment: "Allow Samba ports in ufw"
-      when: ansible_distribution == "Ubuntu"
+- name: Allow Samba ports in UFW
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+    state: enabled
+    comment: "Allow Samba ports in ufw"
+  loop:
+    - '137'
+    - '138'
+    - '139'
+    - '445'
+  when: ansible_distribution == "Ubuntu"
 
-    - name: Enable Samba service in firewalld
-      firewalld:
-        service: smb
-        permanent: yes
-        state: enabled
-        immediate: yes
-      when: ansible_distribution == "OracleLinux"
-
-    - name: Open Samba ports in firewall
-      ansible.posix.firewalld:
-        port: '137-445/tcp'
-        permanent: true
-        state: enabled
-      when: ansible_distribution == "OracleLinux"
+- name: Open Samba ports in firewall
+  ansible.posix.firewalld:
+    port: 137-445/tcp
+    permanent: true
+    state: enabled
+  when: ansible_distribution == "OracleLinux"
 
 - name: Copy admin_manual file to /usr/local/bin directory
   copy:
