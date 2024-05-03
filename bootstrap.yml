@@ -2,9 +2,12 @@
 # $ ansible-playbook bootstrap.yml --syntax-check
 #
 # Usage:
-#   $ ansible-playbook bootstrap.yml
+#   $ ansible-playbook bootstrap.yml -u [remote_user] -K
 # 
-# Note: see [inventory] and [ansible.cfg] for preset details
+# Note: [remote_user] must be present on all nodes and with sudoer privilege
+# Also, each [remote-user] must have the same password
+# see [inventory] and [ansible.cfg] for preset details
+
 
 ---
 
