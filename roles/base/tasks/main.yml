@@ -32,6 +32,6 @@
     mode: '0600'  # Set permissions to restrict access to the file
     backup: yes
 
-# Note: ansible-vault-password has been saved in ~/.ssh/ansible-vault-password and 
-# path was added to environment variable in ~/.bashrc
+# Note: ansible-vault-password has been saved in {{ ansible_home }}/files/used_passwords/ansible-vault-password and 
+# path was added to { ansible_home }}/ansible.cfg
           
