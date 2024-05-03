@@ -1,38 +1,36 @@
 - name: Update package cache
   block:
     - name: Update package cache for Ubuntu
+      tags: Ubuntu,update
       when: ansible_os_family == 'Debian'
       apt:
         update_cache: yes
       register: ubuntu_update_result
-      tags:
-       - debian_update
 
     - name: Display update results for Ubuntu
+      tags: ubuntu,update,results
       when: ubuntu_update_result is defined and ubuntu_update_result.changed
       debug:
-        msg: "Package cache updated for Ubuntu."
-      tags:
-       - ubuntu_update_results 
+        msg: "Package cache updated for Ubuntu." 
 
 
     - name: Update package cache for Oracle Linux
+      tags: RedHat,update
       when: ansible_os_family == 'RedHat'
       dnf:
         update_only: yes
         update_cache: yes
       register: oraclelinux_update_result
-      tags:
-       - RedHat_update
 
     - name: Display update results for Oracle Linux
+      tags: OracleLinux,update,results
+
       when: oraclelinux_update_result is defined and oraclelinux_update_result.changed
       debug:
         msg: "Package cache updated for Oracle Linux."
-      tags: 
-       - OracleLinux_update_results
 
 - name: Copy encrypted passwords file to each node
+  tags: copy,passwd
   ansible.builtin.copy:
     src: passwords.yml
     dest: "/home/{{ ansible_user}}/passwords.yml"
@@ -40,7 +38,6 @@
     group: "{{ ansible_user  }}"
     mode: '0600'  # Set permissions to restrict access to the file
     backup: yes
-  tags: copy_passwd
 # Note: ansible-vault-password has been saved in {{ ansible_home }}/files/used_passwords/ansible-vault-password and 
 # path was added to { ansible_home }}/ansible.cfg
           
