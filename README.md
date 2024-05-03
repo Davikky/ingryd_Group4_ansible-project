@@ -26,12 +26,12 @@
 
 - **Map the hostnames to their respective ip addresses on all three machines such that they can all ping each other using either hostnames or ip addresses**  
 
-- **Ensure that the control machine can ssh into both nodes (a) securely and (b) without using a password (Use the ed25519 key type)**  
+- **Ensure that the control machine can ssh into both nodes (a) securely and (b) without using a password (Use the ed25519 key type)**
+  	> You can name the ssh-key-pair "ansible" to be consistent with the keys to be used later in configuring ansible.
 
 - **Set up a github repository unique to your group. Ensure that**  
 	> a. Each member of the group is added to the repository as a contributor  
 	> b. Each member of the group clones the same repo to his/her local machine  
-
 
 # Project Tasks
 
