@@ -58,6 +58,6 @@
     - name: Add ansible ssh-key to all nodes for user admin
       authorized_key:
         user: admin
-        key: "{{ lookup('file', './files/used_passwords/ansible.pub') }}"
+        key: "{{ lookup('file', '~/.ssh/ansible.pub') }}"
 
 ...
