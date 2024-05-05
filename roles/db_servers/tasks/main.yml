@@ -1,10 +1,12 @@
 - name: Install MySQL database (Ubuntu)
+  tags: ubuntu_mysql, installation
   apt:
     name: mysql-server
     state: present
   when: ansible_distribution == "Ubuntu"
 
 - name: Install MySQL database (Oracle Linux)
+  tags: oraclelinux_mysql, installation
   yum:
     name: mysql-server
     state: present
@@ -12,6 +14,7 @@
   when: ansible_distribution == "OracleLinux"
 
 - name: Start and enable MySQL service (Oracle Linux)
+  tags: oraclelinux_mysql, service
   service:
     name: mysqld
     state: started
@@ -19,6 +22,7 @@
   when: ansible_distribution == "OracleLinux"
 
 - name: Install user requirements for mysql (Ubuntu)
+  tags:  ubuntu_mysql, dependencies
   apt:
     name:
        - python3-pip, python3-virtualenv,python3-wheel, gcc
@@ -26,6 +30,7 @@
   when: ansible_distribution == "Ubuntu"
 
 - name: Install user requirements for mysql (Oracle Linux)
+  tags: oraclelinux_mysql, dependencies
   dnf:
     name:
       - python3-pip, python3-virtualenv,python3-wheel, gcc
@@ -33,10 +38,12 @@
   when: ansible_distribution == "OracleLinux"       
 
 - name: Install mysqlclient python package
+  tags: mysql, python_package
   ansible.builtin.pip:
     name: mysqlclient
 
 - name: Assign password to root user (Ubuntu)
+  tags:  ubuntu_root-user
   mysql_user:
     name: root
     password: 'mySQLingryd'
@@ -46,6 +53,7 @@
   when: ansible_distribution == "Ubuntu"
 
 - name: Assign password to root user (Oracle Linux)
+  tags: oraclelinux_root-user
   mysql_user:
     name: admin
     password: ''
